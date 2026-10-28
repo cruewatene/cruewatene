@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Crue Watene &mdash; AI engineering portfolio</title>
+  <meta name="description" content="Five working AI demos: retrieval-augmented document search, an email support agent, an invoice reader, a voice shop assistant and a 3D interior decorator.">
+  <meta name="theme-color" content="#e9eef6">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23234ee8'/%3E%3Cpath d='M9 21V11h3.4l3.6 6.2L19.6 11H23v10h-2.6v-5.9L17.1 21h-2.2l-3.3-5.9V21z' fill='%23fff'/%3E%3C/svg%3E">
+  <meta property="og:title" content="Crue Watene — AI engineering portfolio">
+  <meta property="og:description" content="Five working AI demos you can use in the browser.">
+  <meta property="og:type" content="website">
+  <style>
+    :root { color-scheme: light; --paper: #e9eef6; --ink: #101e2b; --muted: #50606d; --blue: #234ee8; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { background: var(--paper); color: var(--ink); font: 15px/1.45 "Nunito", "Segoe UI", system-ui, sans-serif; overflow: hidden; }
+
+    /* The portfolio fills the window: no frame, no chrome, nothing around it. */
+    #portfolio { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; opacity: 0; transition: opacity .35s ease; }
+    #portfolio.ready { opacity: 1; }
+
+    #splash { position: fixed; inset: 0; z-index: 2; display: grid; place-items: center; gap: 18px; background: var(--paper); transition: opacity .35s ease; }
+    #splash.gone { opacity: 0; pointer-events: none; }
+    .wrap { display: grid; justify-items: center; gap: 16px; padding: 24px; text-align: center; }
+    .spinner { width: 34px; height: 34px; border: 3px solid rgba(35, 78, 232, .18); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } #portfolio, #splash { transition: none; } }
+    .label { font-weight: 600; letter-spacing: .01em; }
+    .sub { margin: 0; max-width: 38ch; color: var(--muted); font-size: 13.5px; }
+    .retry { display: none; }
+    .retry a { color: var(--blue); font-weight: 600; }
+    #splash.stalled .spinner { display: none; }
+    #splash.stalled .retry { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- The live portfolio. It runs on its own host, so the pages, their APIs and their session storage all stay there;
+     this page is the published front door and adds nothing but the frame. -->
+<iframe id="portfolio"
+        src="https://seaserpentgames.com/lab/portfolio/"
+        title="AI engineering portfolio"
+        allow="microphone; autoplay; clipboard-write; fullscreen"
+        referrerpolicy="no-referrer"
+        loading="eager"></iframe>
+
+<div id="splash">
+  <div class="wrap">
+    <div class="spinner" role="status" aria-label="Loading"></div>
+    <div class="label">Loading the portfolio&hellip;</div>
+    <p class="sub retry">This is taking longer than usual. <a id="direct" href="https://seaserpentgames.com/lab/portfolio/">Open it in a new tab</a> if it does not appear.</p>
+  </div>
+</div>
+
+<script>
+  (() => {
+    const frame = document.getElementById('portfolio');
+    const splash = document.getElementById('splash');
+    let done = false;
+
+    const reveal = () => {
+      if (done) return;
+      done = true;
+      frame.classList.add('ready');
+      splash.classList.add('gone');
+      // Leave the DOM clean once the fade has finished.
+      setTimeout(() => splash.remove(), 400);
+    };
+
+    frame.addEventListener('load', reveal);
+    // A cross-origin frame fires no error event for an HTTP failure, so offer a way out on a timer instead.
+    setTimeout(() => { if (!done) splash.classList.add('stalled'); }, 8000);
+    // If the frame was already in the cache and fired load before this script ran.
+    if (frame.contentWindow && frame.contentWindow.length !== undefined) {
+      setTimeout(() => { try { if (frame.contentDocument === null) reveal(); } catch { reveal(); } }, 50);
+    }
+  })();
+</script>
+</body>
+</html>
